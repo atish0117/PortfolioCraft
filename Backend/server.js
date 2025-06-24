@@ -4,10 +4,9 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import profileRoutes from "./routes/profileRoutes.js";
-
+import projectRoutes from "./routes/projectRoutes.js";
 // Routes
 import authRoutes from "./routes/authRoutes.js";
-
 dotenv.config();
 const app = express();
 
@@ -23,6 +22,8 @@ connectDB();
 app.use("/api/auth", authRoutes);
 
 app.use("/api/profile", profileRoutes);
+
+app.use("/api/projects", projectRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
