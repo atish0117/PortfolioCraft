@@ -1,6 +1,6 @@
 import Project from "../models/Project.js";
 
-// ➕ Create Project
+// Create Project
 export const createProject = async (req, res) => {
   try {
     const project = await Project.create({ ...req.body, userId: req.user._id });
@@ -10,7 +10,7 @@ export const createProject = async (req, res) => {
   }
 };
 
-// 📄 Get All Projects by User
+// Get All Projects by User
 export const getMyProjects = async (req, res) => {
   try {
     const projects = await Project.find({ userId: req.user._id }).sort({ createdAt: -1 });
@@ -20,7 +20,7 @@ export const getMyProjects = async (req, res) => {
   }
 };
 
-// ✏️ Update Project
+// Update Project
 export const updateProject = async (req, res) => {
   try {
     const updated = await Project.findOneAndUpdate(
@@ -35,7 +35,7 @@ export const updateProject = async (req, res) => {
   }
 };
 
-// ❌ Delete Project
+// Delete Project
 export const deleteProject = async (req, res) => {
   try {
     const deleted = await Project.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
