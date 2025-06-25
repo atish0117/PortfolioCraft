@@ -12,8 +12,23 @@ const userSchema = new mongoose.Schema(
     bio: String,
     socialLinks: Object,
     skills: [String],
-    sectionOrder: [String],
-    visibleSections: Object,
+    sectionOrder: {
+  type: [String],
+  default: ["hero", "skills", "projects", "education", "experience", "certifications", "testimonials", "contact"]
+},
+visibleSections: {
+  type: Object,
+  default: {
+    hero: true,
+    skills: true,
+    projects: true,
+    education: true,
+    experience: true,
+    certifications: true,
+    testimonials: true,
+    contact: true
+  }
+},
     testimonials: Array,
     certifications: Array,
     selectedTemplate: { type: String, default: "minimal" },

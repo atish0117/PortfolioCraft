@@ -13,3 +13,20 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+// Update Section Settings
+export const updateSectionSettings = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { sectionOrder, visibleSections } = req.body;
+
+    const updated = await User.findByIdAndUpdate(
+      userId,
+      { sectionOrder, visibleSections },
+      { new: true }
+    );
+
+    res.json({ msg: "Section settings updated", user: updated });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
