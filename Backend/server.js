@@ -9,6 +9,8 @@ import profileRoutes from "./routes/profileRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 
+import publicRoutes from "./routes/publicRoutes.js";
+
 // Middlewares
 dotenv.config();
 const app = express();
@@ -30,6 +32,8 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/projects", projectRoutes);
 
 app.use("/api/upload", uploadRoutes);
+
+app.use("/api/public", publicRoutes);
 
 
 const PORT = process.env.PORT || 5000;
