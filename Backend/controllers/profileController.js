@@ -30,3 +30,35 @@ export const updateSectionSettings = async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 };
+
+
+// Add Testimonial
+export const addTestimonial = async (req, res) => {
+  try {
+    const { name, designation, message, imageUrl } = req.body;
+
+    const user = await User.findById(req.user._id);
+    user.testimonials.push({ name, designation, message, imageUrl });
+
+    await user.save();
+    res.json({ msg: "Testimonial added", testimonials: user.testimonials });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
+
+// Delete Testimonial
+export const deleteTestimonial = async (req, res) => {
+  try {
+    const index = req.params.index;
+    const user = await User.findById(req.user._id);
+
+    user.testimonials.splice(index, 1);
+    await user.save();
+
+    res.json({ msg: "Testimonial deleted", testimonials: user.testimonials });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
+

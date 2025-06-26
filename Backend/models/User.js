@@ -29,7 +29,14 @@ visibleSections: {
     contact: true
   }
 },
-    testimonials: Array,
+    testimonials: [
+  {
+    name: String,
+    designation: String,
+    message: String,
+    imageUrl: String
+  }
+],
     certifications: Array,
     selectedTemplate: { type: String, default: "minimal" },
   },
