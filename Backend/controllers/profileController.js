@@ -62,3 +62,35 @@ export const deleteTestimonial = async (req, res) => {
   }
 };
 
+
+
+// Add Certification
+export const addCertification = async (req, res) => {
+  try {
+    const { title, platform, certificateLink } = req.body;
+
+    const user = await User.findById(req.user._id);
+    user.certifications.push({ title, platform, certificateLink });
+
+    await user.save();
+    res.json({ msg: "Certification added", certifications: user.certifications });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
+
+//  Delete Certification
+export const deleteCertification = async (req, res) => {
+  try {
+    const index = req.params.index;
+    const user = await User.findById(req.user._id);
+
+    user.certifications.splice(index, 1);
+    await user.save();
+
+    res.json({ msg: "Certification deleted", certifications: user.certifications });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
+
