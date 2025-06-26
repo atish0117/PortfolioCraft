@@ -37,7 +37,13 @@ visibleSections: {
     imageUrl: String
   }
 ],
-    certifications: Array,
+    certifications: [
+  {
+    title: String,
+    platform: String,
+    certificateLink: String
+  }
+],
     selectedTemplate: { type: String, default: "minimal" },
   },
   { timestamps: true }
