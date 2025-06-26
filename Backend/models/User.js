@@ -1,9 +1,12 @@
 import mongoose from "mongoose";
 
+
+
+
 const userSchema = new mongoose.Schema(
   {
     fullName: { type: String, required: true },
-    username: { type: String, required: true, unique: true },
+    username: { type: String, required: true, unique: true, trim: true,index: true, },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     profileImgUrl: { type: String, default: "" },
@@ -48,5 +51,23 @@ visibleSections: {
   },
   { timestamps: true }
 );
+
+// 👇 OPTION 1: fullName + random 3-digit username generator
+userSchema.pre("validate", async function (next) {
+  if (!this.username || this.username.trim() === "") {
+    const base = this.fullName.replace(/\s+/g, "").toLowerCase(); // Remove spaces, lowercase
+    let candidate;
+    let exists = true;
+
+    while (exists) {
+      const randomNum = Math.floor(100 + Math.random() * 900); // Random 3-digit number
+      candidate = `${base}${randomNum}`;
+      exists = await mongoose.models.User.exists({ username: candidate });
+    }
+
+    this.username = candidate;
+  }
+  next();
+});
 
 export default mongoose.model("User", userSchema);
