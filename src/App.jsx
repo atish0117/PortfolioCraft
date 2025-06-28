@@ -3,7 +3,7 @@ import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
-
+import Projects from "./pages/Projects";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getCurrentUser } from "./features/auth/authSlice";
@@ -29,6 +29,8 @@ function App() {
   }
 />
       </Routes>
+      <Route path="/projects" element={<Projects />} />
+
     </BrowserRouter>
   );
 }

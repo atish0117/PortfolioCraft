@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { addProject, updateProject } from "./projectSlice";
 import { toast } from "react-toastify";
 
+import { uploadImage } from "../../utils/uploadImage";
 const ProjectForm = ({ editMode = false, existingData = {}, onClose }) => {
   const dispatch = useDispatch();
 
@@ -12,7 +13,7 @@ const ProjectForm = ({ editMode = false, existingData = {}, onClose }) => {
     techStack: "",
     projectLink: ""
   });
-
+const [image, setImage] = useState(null);
   useEffect(() => {
     if (editMode && existingData) {
       setFormData({
@@ -34,12 +35,19 @@ const ProjectForm = ({ editMode = false, existingData = {}, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    let imageUrl = existingData?.imageUrl || "";
+if (image) {
+  const { url } = await uploadImage(image);
+  imageUrl = url;
+}
+
     const payload = {
       ...formData,
       techStack: formData.techStack
         .split(",")
         .map((item) => item.trim())
-        .filter(Boolean)
+        .filter(Boolean),
+        imageUrl
     };
 
     if (editMode) {
@@ -60,6 +68,8 @@ const ProjectForm = ({ editMode = false, existingData = {}, onClose }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded-lg shadow">
+
+
       <input
         name="title"
         value={formData.title}
@@ -84,6 +94,12 @@ const ProjectForm = ({ editMode = false, existingData = {}, onClose }) => {
         placeholder="Tech Stack (comma separated)"
         className="w-full border p-2 rounded"
       />
+      <input
+  type="file"
+  accept="image/*"
+  onChange={(e) => setImage(e.target.files[0])}
+  className="w-full"
+/>
       <input
         name="projectLink"
         value={formData.projectLink}
