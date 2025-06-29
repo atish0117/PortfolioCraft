@@ -7,6 +7,9 @@ import Projects from "./pages/Projects";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getCurrentUser } from "./features/auth/authSlice";
+
+import TemplateSelector from "./components/TemplateSelector";
+import TemplatePage from "./pages/TemplatePage";
 function App() {
 
   const dispatch = useDispatch();
@@ -30,6 +33,10 @@ function App() {
 />
       </Routes>
       <Route path="/projects" element={<Projects />} />
+      <Route path="/select-template" element={<TemplateSelector />} />
+      <Route path="/portfolio/:username" element={<TemplatePage />} />
+
+
 
     </BrowserRouter>
   );

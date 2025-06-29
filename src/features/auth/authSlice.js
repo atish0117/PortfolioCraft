@@ -125,6 +125,20 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
+        // updateTemplate
+export const updateSelectedTemplate = createAsyncThunk(
+  "auth/updateTemplate",
+  async (templateId, thunkAPI) => {
+    try {
+      const res = await API.put("/profile/template", { selectedTemplate: templateId });
+      return res.data.user;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response.data.msg);
+    }
+  }
+);
+
+
 
 const authSlice = createSlice({
   name: "auth",
