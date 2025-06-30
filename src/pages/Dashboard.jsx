@@ -1,100 +1,236 @@
 import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { updateUserProfile } from "../features/auth/authSlice";
-
+import { useDispatch, useSelector } from "react-redux";
+import {
+  updateProfile,
+  uploadProfileImage,
+  uploadResume,
+} from "../features/profile/profileSlice";
+import SkillsSection from "../sections/SkillsSection";
+import { uploadProfileImage, uploadResume } from "../components/dashboard/uploadService";
 const Dashboard = () => {
-  const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const dispatch   = useDispatch();
+  const { user, loading, resumeUrl, profileImgUrl } = useSelector(
+    (state) => state.profile
+  );
 
-  const [formData, setFormData] = useState({
+  /* ---------------- Form state (prefilled) ---------------- */
+  const [form, setForm] = useState({
     fullName: "",
     title: "",
     bio: "",
-    socialLinks: {
+    skills: "",
+      socialLinks: {
       github: "",
-      linkedin: ""
-    }
+      linkedin: "",
+      twitter: "",
+    },
   });
 
-  // Set initial form data from Redux
+  const [resumeFile, setResumeFile]       = useState(null);
+  const [profileImgFile, setProfileImgFile] = useState(null);
+  const [previewUrls, setPreviewUrls]     = useState({ resumeUrl: "", profileImgUrl: "" });
+
+  
+
+  /* Prefill whenever `user` changes */
   useEffect(() => {
     if (user) {
-      setFormData({
-        fullName: user.fullName || "",
-        title: user.title || "",
-        bio: user.bio || "",
-        socialLinks: {
-          github: user?.socialLinks?.github || "",
-          linkedin: user?.socialLinks?.linkedin || ""
-        }
+      setForm({
+        fullName : user.fullName  || "",
+        title    : user.title     || "",
+        bio      : user.bio       || "",
+        skills   : user.skills?.join(", ") || "",
+         socialLinks: {
+          github: user.socialLinks?.github || "",
+          linkedin: user.socialLinks?.linkedin || "",
+          twitter: user.socialLinks?.twitter || "",
+        },
+      });
+        setPreviewUrls({
+        resumeUrl: user.resumeUrl || "",
+        profileImgUrl: user.profileImgUrl || "",
       });
     }
   }, [user]);
 
-  const handleChange = (e) => {
+//   const handleSubmit = async (e) => {
+//   e.preventDefault();
+//   let updatedData = { ...formData };
+
+//   if (resumeFile) {
+//     const resumeUrl = await uploadResume(resumeFile);
+//     updatedData.resumeUrl = resumeUrl;
+//   }
+
+//   if (profileImgFile) {
+//     const imgUrl = await uploadProfileImage(profileImgFile);
+//     updatedData.profileImgUrl = imgUrl;
+//   }
+
+//   dispatch(updateProfile(updatedData));
+// };
+
+    const handleChange = (e) => {
     const { name, value } = e.target;
-    if (["github", "linkedin"].includes(name)) {
+    if (["github", "linkedin", "twitter",].includes(name)) {
       setFormData((prev) => ({
         ...prev,
-        socialLinks: { ...prev.socialLinks, [name]: value }
+        socialLinks: {
+          ...prev.socialLinks,
+          [name]: value,
+        },
       }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    dispatch(updateUserProfile(formData));
+
+    /* ------ file inputs ------ */
+  const handleResumeSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) setResumeFile(file);
   };
 
-  return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-xl shadow">
-      <h2 className="text-xl font-bold mb-6 text-center">Update Profile</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImgFile(file);
+      setPreviewUrls((p) => ({ ...p, profileImgUrl: URL.createObjectURL(file) }));
+    }
+  };
+
+  /* ------ submit handler ------ */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    /* step‑1: upload files (if selected) */
+    let resumeUrl = previewUrls.resumeUrl;
+    let profileImgUrl = previewUrls.profileImgUrl;
+
+    if (resumeFile)     resumeUrl     = await uploadResume(resumeFile);
+    if (profileImgFile) profileImgUrl = await uploadProfileImage(profileImgFile);
+
+    /* step‑2: prepare payload */
+    const skillsArr = form.skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const payload = {
+      fullName: form.fullName,
+      title: form.title,
+      bio: form.bio,
+      skills: skillsArr,
+      socialLinks: form.socialLinks,
+      resumeUrl,
+      profileImgUrl,
+    };
+
+    /* step‑3: dispatch update */
+    dispatch(updateProfile(payload));
+  };
+
+  /* ---------------- UI ---------------- */
+ return (
+    <div className="max-w-4xl mx-auto p-6 mt-10 bg-white shadow rounded-lg">
+      <h1 className="text-3xl font-bold mb-6 text-center">Profile Settings</h1>
+
+      {/* -------- Profile Form -------- */}
+      <form onSubmit={handleSubmit} className="grid gap-4">
         <input
           name="fullName"
-          value={formData.fullName}
+          value={form.fullName}
           onChange={handleChange}
           placeholder="Full Name"
-          className="w-full border p-2 rounded"
+          className="p-2 border rounded"
         />
         <input
           name="title"
-          value={formData.title}
+          value={form.title}
           onChange={handleChange}
-          placeholder="Your Title (e.g. MERN Stack Dev)"
-          className="w-full border p-2 rounded"
+          placeholder="Professional Title"
+          className="p-2 border rounded"
         />
         <textarea
           name="bio"
-          value={formData.bio}
+          value={form.bio}
           onChange={handleChange}
           placeholder="Short Bio"
           rows={3}
-          className="w-full border p-2 rounded"
+          className="p-2 border rounded"
         />
         <input
-          name="github"
-          value={formData.socialLinks.github}
+          name="skills"
+          value={form.skills}
           onChange={handleChange}
-          placeholder="GitHub URL"
-          className="w-full border p-2 rounded"
+          placeholder="Skills (comma‑separated)"
+          className="p-2 border rounded"
         />
-        <input
-          name="linkedin"
-          value={formData.socialLinks.linkedin}
-          onChange={handleChange}
-          placeholder="LinkedIn URL"
-          className="w-full border p-2 rounded"
-        />
+
+        {/* Social Links */}
+        <div>
+          <label className="block font-medium">Social Links</label>
+          {["github", "linkedin", "twitter", "portfolio"].map((field) => (
+            <input
+              key={field}
+              name={field}
+              value={form.socialLinks[field] || ""}
+              onChange={handleChange}
+              placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+              className="w-full border p-2 rounded mb-2"
+            />
+          ))}
+        </div>
+
         <button
           type="submit"
-          className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-4 rounded"
+          className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 rounded"
         >
-          Save Profile
+          {loading ? "Saving..." : "Save Changes"}
         </button>
       </form>
+
+      {/* -------- File Uploads -------- */}
+      <div className="grid md:grid-cols-2 gap-6 mt-8">
+        {/* Resume */}
+        <div>
+          <label className="font-semibold block mb-1">Resume (PDF)</label>
+          <input type="file" accept=".pdf" onChange={handleResumeSelect} />
+          {previewUrls.resumeUrl && (
+            <a
+              href={previewUrls.resumeUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="block text-blue-600 underline mt-1"
+            >
+              View current resume
+            </a>
+          )}
+        </div>
+
+        {/* Profile Image */}
+        <div>
+          <label className="font-semibold block mb-1">Profile Image</label>
+          <input type="file" accept="image/*" onChange={handleImageSelect} />
+          {previewUrls.profileImgUrl && (
+            <img
+              src={previewUrls.profileImgUrl}
+              alt="profile"
+              className="w-24 h-24 rounded-full border mt-2 object-cover"
+            />
+          )}
+        </div>
+      </div>
+
+      {/* -------- Live Preview -------- */}
+      <div className="mt-10 border-t pt-8">
+        <h2 className="text-xl font-bold mb-4">Live Skills Preview</h2>
+        <SkillsSection
+          skills={form.skills.split(",").map((s) => s.trim()).filter(Boolean)}
+          visible={true}
+        />
+      </div>
     </div>
   );
 };

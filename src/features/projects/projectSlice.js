@@ -6,8 +6,9 @@ export const addProject = createAsyncThunk(
   "projects/addProject",
   async (projectData, thunkAPI) => {
     try {
-      const res = await API.post("/projects", projectData);
-      return res.data.project;
+      const res = await API.post("/profile/projects", projectData);
+       toast.success("Project added");
+      return res.data.projects;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response.data.msg);
     }
@@ -19,10 +20,10 @@ export const getProjects = createAsyncThunk(
   "projects/getProjects",
   async (_, thunkAPI) => {
     try {
-      const res = await API.get("/projects");
-      return res.data.projects;
+      const res = await API.get("/auth/me");
+      return res.data.projects || [] ;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response.data.msg);
+      return thunkAPI.rejectWithValue(err.response.data?.msg);
     }
   }
 );
@@ -32,10 +33,11 @@ export const deleteProject = createAsyncThunk(
   "projects/deleteProject",
   async (projectId, thunkAPI) => {
     try {
-      await API.delete(`/projects/${projectId}`);
-      return projectId;
+      await API.delete(`/profile/projects/${projectId}`);
+       toast.success("Project deleted");
+        return res.data.projects;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response.data.msg);
+      return thunkAPI.rejectWithValue(err.response.data?.msg);
     }
   }
 );
@@ -45,10 +47,11 @@ export const updateProject = createAsyncThunk(
   "projects/updateProject",
   async ({ id, updatedData }, thunkAPI) => {
     try {
-      const res = await API.put(`/projects/${id}`, updatedData);
-      return res.data.project;
+      const res = await API.put(`/profile/projects/${id}`, updatedData);
+       toast.success("Project updated");
+      return res.data.projects;
     } catch (err) {
-      return thunkAPI.rejectWithValue(err.response.data.msg);
+      return thunkAPI.rejectWithValue(err.response.data?.msg);
     }
   }
 );
@@ -57,6 +60,7 @@ const projectSlice = createSlice({
   name: "projects",
   initialState: {
     projects: [],
+    list: [],
     loading: false,
     error: null
   },
@@ -64,47 +68,38 @@ const projectSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Add
-      .addCase(addProject.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(addProject.fulfilled, (state, action) => {
-        state.projects.push(action.payload);
-        state.loading = false;
-      })
-      .addCase(addProject.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+  // ⏳ Loading
+      .addCase(addProject.pending, (state) => { state.loading = true; })
+      .addCase(deleteProject.pending, (state) => { state.loading = true; })
+      .addCase(updateProject.pending, (state) => { state.loading = true; })
+      .addCase(getProjects.pending, (state) => { state.loading = true; })
 
-      // Get
-      .addCase(getProjects.pending, (state) => {
-        state.loading = true;
+      // ✅ Success
+      .addCase(addProject.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload;
+      })
+      .addCase(deleteProject.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload;
+      })
+      .addCase(updateProject.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload;
       })
       .addCase(getProjects.fulfilled, (state, action) => {
-        state.projects = action.payload;
         state.loading = false;
-      })
-      .addCase(getProjects.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+        state.list = action.payload;
       })
 
-      // Delete
-      .addCase(deleteProject.fulfilled, (state, action) => {
-        state.projects = state.projects.filter(
-          (project) => project._id !== action.payload
-        );
-      })
-
-      // Update
-      .addCase(updateProject.fulfilled, (state, action) => {
-        const index = state.projects.findIndex(
-          (p) => p._id === action.payload._id
-        );
-        if (index !== -1) {
-          state.projects[index] = action.payload;
+      // ❌ Failure
+      .addMatcher(
+        (action) => action.type.startsWith("projects/") && action.type.endsWith("rejected"),
+        (state, action) => {
+          state.loading = false;
+          state.error = action.payload || "Something went wrong";
         }
-      });
+      );
   }
 });
 

@@ -9,18 +9,46 @@ const userSchema = new mongoose.Schema(
     username: { type: String, required: true, unique: true, trim: true,index: true, },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+     // Profile Fields
     profileImgUrl: { type: String, default: "" },
     resumeUrl: { type: String, default: "" },
     title: String,
     bio: String,
-    socialLinks: Object,
+     socialLinks: {
+    github: String,
+    linkedin: String,
+    twitter: String,
+  },
     skills: [String],
+     workExperience: {
+      type: String,
+      default: "Fresher",
+    },
+      // Portfolio Sections
+    experienceDetails: [
+      {
+        companyName: { type: String, required: true },
+        jobTitle: { type: String, required: true },
+        duration: { type: String, required: true },
+        responsibilities: String,
+        skills: [String],
+      },
+    ],
+      education: [
+      {
+        institution: { type: String, required: true },
+        degree: { type: String, required: true },
+        startYear: String,
+        endYear: String
+      },
+    ],
     sectionOrder: {
   type: [String],
   default: ["hero", "skills", "projects", "education", "experience", "certifications", "testimonials", "contact"]
 },
 visibleSections: {
-  type: Object,
+  type: Map,
+  of: Boolean,
   default: {
     hero: true,
     skills: true,

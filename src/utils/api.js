@@ -17,60 +17,59 @@
 // 4. Shows a toast for any response errors in a single place
 
 import axios from "axios";
-import { store } from "../app/store";
-// ❗️ Make sure you have a uiSlice or similar with setLoading action
-import { setLoading } from "../features/ui/uiSlice"; // adjust path if needed
 import { toast } from "react-toastify";
+import { setLoading } from "../features/ui/uiSlice"; // sirf action, store nahin
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
-  withCredentials: true, // send HTTP‑only JWT cookies automatically
+  withCredentials: true,
 });
 
-// 🔐 REQUEST INTERCEPTOR
-API.interceptors.request.use(
-  (config) => {
-    // (Optional) Attach Bearer token from Redux/localStorage
-    const { auth } = store.getState();
-    if (auth?.token) {
-      config.headers.Authorization = `Bearer ${auth.token}`;
+/*
+ * is function ko baad me call karke redux‑store inject karenge
+ */
+export const attachInterceptors = (store) => {
+  // REQUEST
+  API.interceptors.request.use(
+    (config) => {
+      const { auth } = store.getState();          // ⬅ store yahan safe hai
+      if (auth?.token) {
+        config.headers.Authorization = `Bearer ${auth.token}`;
+      }
+      store.dispatch(setLoading(true));
+      return config;
+    },
+    (error) => {
+      store.dispatch(setLoading(false));
+      return Promise.reject(error);
     }
+  );
 
-    // 🔄 Start global loading spinner
-    store.dispatch(setLoading(true));
-    return config;
-  },
-  (error) => {
-    store.dispatch(setLoading(false));
-    return Promise.reject(error);
-  }
-);
+  // RESPONSE
+  API.interceptors.response.use(
+    (response) => {
+      store.dispatch(setLoading(false));
+      return response;
+    },
+    (error) => {
+      store.dispatch(setLoading(false));
 
-// 🎯 RESPONSE INTERCEPTOR
-API.interceptors.response.use(
-  (response) => {
-    store.dispatch(setLoading(false)); // ✅ Stop spinner on success
-    return response;
-  },
-  (error) => {
-    store.dispatch(setLoading(false)); // ✅ Stop spinner on error
+      const msg =
+        error.response?.data?.msg ||
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong";
+      toast.error(msg);
 
-    // 🛑 Global error toast
-    const message =
-      error.response?.data?.msg ||
-      error.response?.data?.message ||
-      error.message ||
-      "Something went wrong";
-    toast.error(message);
+      if (error.response?.status === 401) {
+        store.dispatch({ type: "auth/logout" });
+      }
 
-    // 🔒 Auto‑logout on 401 (optional)
-    if (error.response?.status === 401) {
-      store.dispatch({ type: "auth/logout" });
+      return Promise.reject(error);
     }
-
-    return Promise.reject(error);
-  }
-);
+  );
+};
 
 export default API;
+
 

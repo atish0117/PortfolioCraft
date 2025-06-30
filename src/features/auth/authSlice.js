@@ -72,7 +72,7 @@
 
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import API from "../../utils/axios"; // 👈 Axios instance with credentials
+import API from "../../utils/api"; // 👈 Axios instance with credentials
 import { toast } from "react-toastify";
 
 // 🔄 Register
@@ -137,6 +137,22 @@ export const updateSelectedTemplate = createAsyncThunk(
     }
   }
 );
+    //Update Section Settings
+export const updateSectionSettings = createAsyncThunk(
+  "auth/updateSectionSettings",
+  async ({ sectionOrder, visibleSections }, thunkAPI) => {
+    try {
+      const res = await API.put("/profile/section-settings", {
+        sectionOrder,
+        visibleSections
+      });
+      return res.data.user;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response?.data?.msg || "Failed");
+    }
+  }
+);
+
 
 
 

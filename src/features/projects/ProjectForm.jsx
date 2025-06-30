@@ -1,120 +1,65 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { addProject, updateProject } from "./projectSlice";
-import { toast } from "react-toastify";
 
-import { uploadImage } from "../../utils/uploadImage";
-const ProjectForm = ({ editMode = false, existingData = {}, onClose }) => {
-  const dispatch = useDispatch();
-
+const ProjectFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     techStack: "",
-    projectLink: ""
+    githubLink: "",
+    liveLink: ""
   });
-const [image, setImage] = useState(null);
+
   useEffect(() => {
-    if (editMode && existingData) {
+    if (initialData) {
       setFormData({
-        title: existingData.title || "",
-        description: existingData.description || "",
-        techStack: existingData.techStack?.join(", ") || "",
-        projectLink: existingData.projectLink || ""
+        ...initialData,
+        techStack: initialData.techStack.join(", ")
+      });
+    } else {
+      setFormData({
+        title: "",
+        description: "",
+        techStack: "",
+        githubLink: "",
+        liveLink: ""
       });
     }
-  }, [editMode, existingData]);
+  }, [initialData]);
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    let imageUrl = existingData?.imageUrl || "";
-if (image) {
-  const { url } = await uploadImage(image);
-  imageUrl = url;
-}
-
-    const payload = {
+    const cleaned = {
       ...formData,
-      techStack: formData.techStack
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean),
-        imageUrl
+      techStack: formData.techStack.split(",").map((s) => s.trim())
     };
-
-    if (editMode) {
-      const res = await dispatch(updateProject({ id: existingData._id, updatedData: payload }));
-      if (res.meta.requestStatus === "fulfilled") {
-        toast.success("Project updated!");
-        onClose?.();
-      }
-    } else {
-      const res = await dispatch(addProject(payload));
-      if (res.meta.requestStatus === "fulfilled") {
-        toast.success("Project added!");
-        setFormData({ title: "", description: "", techStack: "", projectLink: "" });
-        onClose?.();
-      }
-    }
+    onSubmit(cleaned);
+    onClose();
   };
+
+  if (!isOpen) return null;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded-lg shadow">
-
-
-      <input
-        name="title"
-        value={formData.title}
-        onChange={handleChange}
-        placeholder="Project Title"
-        className="w-full border p-2 rounded"
-        required
-      />
-      <textarea
-        name="description"
-        value={formData.description}
-        onChange={handleChange}
-        placeholder="Short Description"
-        rows={3}
-        className="w-full border p-2 rounded"
-        required
-      />
-      <input
-        name="techStack"
-        value={formData.techStack}
-        onChange={handleChange}
-        placeholder="Tech Stack (comma separated)"
-        className="w-full border p-2 rounded"
-      />
-      <input
-  type="file"
-  accept="image/*"
-  onChange={(e) => setImage(e.target.files[0])}
-  className="w-full"
-/>
-      <input
-        name="projectLink"
-        value={formData.projectLink}
-        onChange={handleChange}
-        placeholder="Project URL (optional)"
-        className="w-full border p-2 rounded"
-      />
-      <button
-        type="submit"
-        className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-4 rounded"
-      >
-        {editMode ? "Update Project" : "Add Project"}
-      </button>
-    </form>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+        <h2 className="text-xl font-bold mb-4">{initialData ? "Edit" : "Add"} Project</h2>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input name="title" value={formData.title} onChange={handleChange} placeholder="Project Title" className="w-full border p-2 rounded" />
+          <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Description" className="w-full border p-2 rounded" />
+          <input name="techStack" value={formData.techStack} onChange={handleChange} placeholder="Tech Stack (comma-separated)" className="w-full border p-2 rounded" />
+          <input name="githubLink" value={formData.githubLink} onChange={handleChange} placeholder="GitHub Link" className="w-full border p-2 rounded" />
+          <input name="liveLink" value={formData.liveLink} onChange={handleChange} placeholder="Live Link" className="w-full border p-2 rounded" />
+          <div className="flex justify-end space-x-2 mt-3">
+            <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
+            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">{initialData ? "Update" : "Add"}</button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 
-export default ProjectForm;
+export default ProjectFormModal;

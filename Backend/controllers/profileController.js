@@ -13,7 +13,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// Update Section Settings
+// Update Section Settings (order + visibility)
 export const updateSectionSettings = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -93,4 +93,7 @@ export const deleteCertification = async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 };
+
+
+
 

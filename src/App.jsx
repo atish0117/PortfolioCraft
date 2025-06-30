@@ -26,16 +26,16 @@ function App() {
         <Route
   path="/dashboard"
   element={
-    <PrivateRoute>
+    // <PrivateRoute>
       <Dashboard />
-    </PrivateRoute>
+    // </PrivateRoute>
   }
 />
-      </Routes>
       <Route path="/projects" element={<Projects />} />
       <Route path="/select-template" element={<TemplateSelector />} />
       <Route path="/portfolio/:username" element={<TemplatePage />} />
 
+      </Routes>
 
 
     </BrowserRouter>
