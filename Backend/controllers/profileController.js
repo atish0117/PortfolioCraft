@@ -95,5 +95,33 @@ export const deleteCertification = async (req, res) => {
 };
 
 
+      // update templates
+export const updateTemplate = async (req, res) => {
+  try {
+    const { selectedTemplate } = req.body;
+
+    const validTemplates = ["minimal", "modern", "classic", "dark", "funky"];
+    if (!validTemplates.includes(selectedTemplate)) {
+      return res.status(400).json({ msg: "Invalid template selected" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { selectedTemplate },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    res.status(200).json({
+      msg: "Template updated",
+      selectedTemplate: user.selectedTemplate,
+    });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
+
+
 
 

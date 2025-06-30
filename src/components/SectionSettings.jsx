@@ -1,67 +1,68 @@
-import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateSectionSettings } from "../features/auth/authSlice";
+import {
+  toggleSection,
+  reorderSections,
+  updateSectionSettings,
+} from "../features/sections/sectionSlice";
+import { useState } from "react";
 
-const SectionSettings = () => {
-  const { user } = useSelector((state) => state.auth);
+const SectionManager = () => {
   const dispatch = useDispatch();
+  const { visibleSections, sectionOrder } = useSelector((state) => state.sections);
+  const [tempOrder, setTempOrder] = useState([...sectionOrder]);
 
-  const [sectionOrder, setSectionOrder] = useState(user.sectionOrder || []);
-  const [visibleSections, setVisibleSections] = useState(user.visibleSections || {});
-
-  const moveUp = (index) => {
-    if (index === 0) return;
-    const newOrder = [...sectionOrder];
-    [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
-    setSectionOrder(newOrder);
+  const handleToggle = (section) => {
+    dispatch(toggleSection(section));
   };
 
-  const moveDown = (index) => {
-    if (index === sectionOrder.length - 1) return;
-    const newOrder = [...sectionOrder];
-    [newOrder[index + 1], newOrder[index]] = [newOrder[index], newOrder[index + 1]];
-    setSectionOrder(newOrder);
+  const handleDragStart = (e, index) => {
+    e.dataTransfer.setData("startIndex", index);
   };
 
-  const toggleSection = (section) => {
-    setVisibleSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+  const handleDrop = (e, endIndex) => {
+    const startIndex = e.dataTransfer.getData("startIndex");
+    const updated = [...tempOrder];
+    const [removed] = updated.splice(startIndex, 1);
+    updated.splice(endIndex, 0, removed);
+    setTempOrder(updated);
   };
 
   const handleSave = () => {
-    dispatch(updateSectionSettings({ sectionOrder, visibleSections }));
+    dispatch(updateSectionSettings({ visibleSections, sectionOrder: tempOrder }));
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Customize Portfolio Sections</h2>
-      {sectionOrder.map((section, index) => (
-        <div key={section} className="flex justify-between items-center border p-2 rounded-md">
-          <span className="capitalize">{section}</span>
-          <div className="flex items-center gap-3">
-            <label className="text-sm">
-              <input
-                type="checkbox"
-                checked={visibleSections[section]}
-                onChange={() => toggleSection(section)}
-              />
-              <span className="ml-1">Show</span>
-            </label>
-            <button onClick={() => moveUp(index)}>⬆</button>
-            <button onClick={() => moveDown(index)}>⬇</button>
-          </div>
-        </div>
-      ))}
+    <div className="p-4 max-w-2xl mx-auto bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Manage Sections</h2>
+
+      <ul className="space-y-2">
+        {tempOrder.map((section, index) => (
+          <li
+            key={section}
+            className="flex justify-between items-center bg-gray-100 p-2 rounded cursor-move"
+            draggable
+            onDragStart={(e) => handleDragStart(e, index)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => handleDrop(e, index)}
+          >
+            <span className="capitalize">{section}</span>
+            <input
+              type="checkbox"
+              checked={visibleSections[section]}
+              onChange={() => handleToggle(section)}
+            />
+          </li>
+        ))}
+      </ul>
+
       <button
+        className="mt-4 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 rounded font-semibold"
         onClick={handleSave}
-        className="bg-yellow-400 px-4 py-2 rounded font-semibold"
       >
-        Save Settings
+        Save Changes
       </button>
     </div>
   );
 };
 
-export default SectionSettings;
+export default SectionManager;

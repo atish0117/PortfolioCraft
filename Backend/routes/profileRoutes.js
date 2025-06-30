@@ -1,5 +1,5 @@
 import express from "express";
-import { updateProfile,updateSectionSettings  } from "../controllers/profileController.js";
+import { updateProfile,updateSectionSettings, updateTemplate   } from "../controllers/profileController.js";
 import { addTestimonial, deleteTestimonial } from "../controllers/profileController.js";
 import { addCertification, deleteCertification } from "../controllers/profileController.js";
 import {
@@ -18,7 +18,7 @@ import { protect } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.put("/", protect, updateProfile);
-
+router.put("/template", protect, updateTemplate);
 router.put("/section-settings", protect, updateSectionSettings);
 router.post("/testimonial", protect, addTestimonial);
 router.delete("/testimonial/:index", protect, deleteTestimonial);

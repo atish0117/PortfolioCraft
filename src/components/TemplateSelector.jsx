@@ -1,19 +1,17 @@
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateSelectedTemplate } from "../features/auth/authSlice";
+import { updateTemplate } from "../features/template/templateSlice";
 
-const templates = [
-  { id: "template1", name: "Classic", image: "/templates/template1.png" },
-  { id: "template2", name: "Modern", image: "/templates/template2.png" },
-  { id: "template3", name: "Minimal", image: "/templates/template3.png" },
-];
+const templates = ["minimal", "modern", "classic", "dark", "funky"];
+
+
 
 const TemplateSelector = () => {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+   const { selected, loading } = useSelector((state) => state.template);
 
-  const handleSelect = (id) => {
-    dispatch(updateSelectedTemplate(id));
+  const handleSelect = (templateId) => {
+      if (loading || selected === templateId) return;
+    dispatch(updateTemplate(templateId));
   };
 
   return (
@@ -25,12 +23,10 @@ const TemplateSelector = () => {
           <button
             onClick={() => handleSelect(tpl.id)}
             className={`mt-2 w-full py-1 px-3 rounded ${
-              user?.selectedTemplate === tpl.id
-                ? "bg-green-500 text-white"
-                : "bg-yellow-400"
-            }`}
+               selected === tpl ? "bg-yellow-300 border-black font-bold" : "bg-white"
+          }`}
           >
-            {user?.selectedTemplate === tpl.id ? "Selected" : "Choose"}
+            {tpl.toUpperCase()}
           </button>
         </div>
       ))}
