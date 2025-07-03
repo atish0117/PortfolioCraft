@@ -5,7 +5,7 @@ import {
   deleteProject,
   getProjects,
   updateProject
-} from "../features/projects/projectsSlice";
+} from "../features/projects/projectSlice";
 import ProjectForm from "../features/projects/ProjectForm";
 import { FaTrash, FaEdit, FaPlus } from "react-icons/fa";
 

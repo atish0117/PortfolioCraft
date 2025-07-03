@@ -28,48 +28,39 @@ export const updateProfile = createAsyncThunk(
   }
 );
 
-// 📄 Upload Resume
-// export const updateResume = createAsyncThunk("profile/updateResume", async (formData, thunkAPI) => {
-//   try {
-//     const res = await API.put("/profile/resume", formData);
-//     toast.success("Resume updated!");
-//     return res.data.resumeUrl;
-//   } catch (err) {
-//     return thunkAPI.rejectWithValue("Resume upload failed");
-//   }
-// });
 
 
 // 📤 Upload Resume
-// export const uploadResume = createAsyncThunk(
-//   "profile/uploadResume",
-//   async (file, thunkAPI) => {
-//     try {
-//       const formData = new FormData();
-//       formData.append("resume", file);
-//       const res = await API.post("/api/upload/resume", formData);
-//       console.log(res.data.url)
-//       return res.data.url;
-//     } catch (err) {
-//       return thunkAPI.rejectWithValue(err.response.data.msg);
-//     }
-//   }
-// );
+export const uploadResume = createAsyncThunk(
+  "profile/uploadResume",
+  async (file, thunkAPI) => {
+    console.log("resume", file)
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+      const res = await API.post("/api/upload/resume", formData);
+      console.log('URL..',res.data.url)
+      return res.data.url;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response.data.msg);
+    }
+  }
+);
 
 // // 🖼️ Upload Profile Image
-// export const uploadProfileImage = createAsyncThunk(
-//   "profile/uploadImage",
-//   async (file, thunkAPI) => {
-//     try {
-//       const formData = new FormData();
-//       formData.append("image", file);
-//       const res = await API.post("/api/upload/profile-image", formData);
-//       return res.data.url;
-//     } catch (err) {
-//       return thunkAPI.rejectWithValue(err.response.data.msg);
-//     }
-//   }
-// );
+export const uploadProfileImage = createAsyncThunk(
+  "profile/uploadImage",
+  async (file, thunkAPI) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await API.post("/api/upload/profile-image", formData);
+      return res.data.url;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response.data.msg);
+    }
+  }
+);
 
 
 // 🗣 Testimonials

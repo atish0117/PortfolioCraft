@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "react-toastify";
 const Signup = () => {
   const [formData, setFormData] = useState({
     fullName: "",

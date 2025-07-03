@@ -77,12 +77,14 @@ import { toast } from "react-toastify";
 
 // 🔄 Register
 export const registerUser = createAsyncThunk("auth/register", async (formData, thunkAPI) => {
+  console.log(formData)
   try {
     const res = await API.post("/auth/register", formData);
     toast.success("Registered successfully!");
     return res.data.user;
   } catch (err) {
-    const message = err.response?.data?.msg || "Registration failed";
+    const message = err.response?.data.msg || "Registration failed";
+    console.log(message)
     toast.error(message);
     return thunkAPI.rejectWithValue(message);
   }
